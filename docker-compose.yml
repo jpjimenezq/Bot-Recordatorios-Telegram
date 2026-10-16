@@ -16,5 +16,16 @@ services:
       timeout: 5s
       retries: 5
 
+  bot:
+    build: ./bot
+    restart: unless-stopped
+    env_file: .env
+    # Dentro de Docker la base se llama "db" y usa el puerto interno 5432
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:

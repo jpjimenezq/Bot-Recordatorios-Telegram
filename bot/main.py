@@ -1,21 +1,11 @@
 
 import asyncio
-import os
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
-from aiogram.types import Message
-from dotenv import load_dotenv
-from src.handlers import router as handlers_router
+
 from src import database
-
-# Cargamos variables del archivo .env
-load_dotenv()
-
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
-if not TOKEN:
-    raise ValueError("No se encontró TELEGRAM_BOT_TOKEN en el archivo .env")
+from src.config import DATABASE_URL, TOKEN
+from src.handlers import router as handlers_router
 
 bot = Bot(token=TOKEN)
 # Administra los mensajes que recibe el bot
@@ -25,7 +15,7 @@ dp.include_router(handlers_router)
 
 
 async def main():
-    await database.conectar(os.getenv("DATABASE_URL"))
+    await database.conectar(DATABASE_URL)
     try:
         print("Iniciando bot...")
         # Mantenemos el programa consultando a Telegram para recibir actualizaciones

@@ -1,14 +1,11 @@
 import inspect
 
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from src import repositories
-
-# Zona horaria del usuario: las fechas se guardan con esta zona y se muestran en ella
-ZONA = ZoneInfo("America/Bogota")
+from src.config import ZONA
 
 # Lista de comandos; se usa en /ayuda y cuando el usuario escribe algo que no entendemos
 AYUDA = inspect.cleandoc("""
