@@ -1,13 +1,28 @@
 import inspect
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from aiogram import Router
-from aiogram.filters import Command, CommandStart, CommandObject
+from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from src import repositories
 
+# Zona horaria del usuario: las fechas se guardan con esta zona y se muestran en ella
+ZONA = ZoneInfo("America/Bogota")
+
+# Lista de comandos; se usa en /ayuda y cuando el usuario escribe algo que no entendemos
+AYUDA = inspect.cleandoc("""
+    Comandos disponibles:
+    /inicio - Inicia el bot
+    /ayuda - Muestra los comandos disponibles
+    /agregar - Agrega un recordatorio
+    /listar - Muestra los recordatorios
+    /borrar - Elimina un recordatorio
+    """)
+
 router = Router()
 
-@router.message(CommandStart())
+@router.message(Command("inicio", "start"))
 async def start_handler(message: Message):
     msg = inspect.cleandoc("""
     ¡Hola! Soy tu bot de recordatorios.
@@ -16,26 +31,22 @@ async def start_handler(message: Message):
     await message.answer(msg)
 
 
-@router.message(Command("help"))
+@router.message(Command("ayuda"))
 async def help_handler(message: Message):
-    msg = inspect.cleandoc("""
-    Comandos disponibles:
-    /start - Inicia el bot
-    /help - Muestra los comandos disponibles
-    /add - Agrega un recordatorio
-    /list - Muestra los recordatorios
-    /delete - Elimina un recordatorio
-    """)
-    await message.answer(msg)
+    await message.answer(AYUDA)
 
 
-@router.message(Command("add"))
+@router.message(Command("agregar"))
 async def add_handler(message: Message, command: CommandObject):
-    partes = command.args.split()
-    if not command.args or len(partes) < 3:
-        await message.answer("Uso: /add <fecha> <hora> <recordatorio>")
+    if not command.args:
+        await message.answer("Uso: /agregar <fecha> <hora> <recordatorio>")
         return
     
+    partes = command.args.split()
+    if len(partes) < 3:
+        await message.answer("Uso: /agregar <fecha> <hora> <recordatorio>")
+        return
+
     fecha_str = partes[0]
     hora_str = partes[1]
     recordatorio_texto = " ".join(partes[2:])
@@ -43,8 +54,8 @@ async def add_handler(message: Message, command: CommandObject):
     try:
         fecha = datetime.strptime(fecha_str, "%d/%m/%Y").date()
         hora = datetime.strptime(hora_str, "%H:%M").time()
-        fecha_hora = datetime.combine(fecha, hora)
-        ahora = datetime.now()
+        fecha_hora = datetime.combine(fecha, hora, tzinfo=ZONA)
+        ahora = datetime.now(ZONA)
 
         if fecha_hora <= ahora:
             await message.answer("La fecha y hora deben ser posteriores a la actual")
@@ -75,7 +86,8 @@ async def list_handler(message: Message):
     📋 Tus recordatorios:
     """)
     for fila in filas:
-        msg += f"\n{fila['id']}. {fila['texto']} - {fila['fecha_hora']}"
+        local = fila["fecha_hora"].astimezone(ZONA)
+        msg += f"\n{fila['id']}. {fila['texto']} - {local:%d/%m/%Y %H:%M}"
     await message.answer(msg)
 
 
@@ -84,8 +96,13 @@ async def delete_handler(message: Message, command: CommandObject):
     try:
         await repositories.borrar(int(command.args))
         await message.answer("✅ Recordatorio eliminado correctamente")
-    except (ValueError, IndexError):
+    except (TypeError, ValueError, IndexError):
         await message.answer("Uso: /borrar <id>")
     except Exception as e:
         await message.answer(f"Error: {e}")
-        
+
+
+@router.message()
+async def mensaje_desconocido(message: Message):
+    await message.answer("No entendí ese mensaje.\n\n" + AYUDA)
+
