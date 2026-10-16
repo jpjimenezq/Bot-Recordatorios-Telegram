@@ -1,0 +1,46 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Bytecode y caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Variables de entorno y secretos (evita subir credenciales o tokens del bot)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Bases de datos locales y volumen de datos
+*.sqlite
+*.sqlite3
+*.db
+data/
+postgres_data/
+
+# Logs
+*.log
+logs/
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Pruebas y análisis de código
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

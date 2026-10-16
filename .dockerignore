@@ -1,0 +1,49 @@
+# Control de versiones
+.git
+.gitignore
+
+# Entornos virtuales locales
+venv
+.venv
+env
+
+# Bytecode y caché de Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Variables de entorno y secretos (deben inyectarse en el contenedor vía docker-compose/environment)
+.env
+.env.*
+!.env.example
+
+# Archivos propios de Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Editores e IDEs
+.vscode
+.idea
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs y bases de datos locales
+*.log
+logs
+*.sqlite
+*.sqlite3
+*.db
+postgres_data
+data
+
+# Pruebas y análisis de código
+.pytest_cache
+.coverage
+htmlcov
+.mypy_cache
+.ruff_cache
